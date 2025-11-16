@@ -1,0 +1,5 @@
+{
+  "name": "iPhone Notification UI Mock",
+  "description": "A web-based mock of an iPhone's notification screen, displaying a curated list of notifications. This app is built with React, TypeScript, and Tailwind CSS to create a visually appealing and realistic user interface.",
+  "requestFramePermissions": []
+}
