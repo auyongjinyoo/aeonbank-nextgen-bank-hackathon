@@ -1,0 +1,821 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -928,
+        -320
+      ],
+      "id": "c5ac748d-ac8d-41dc-a172-c4e1f660e290",
+      "name": "When chat message received",
+      "webhookId": "0f3eabb7-5ac0-4980-a381-9f47a6f9133e"
+    },
+    {
+      "parameters": {
+        "modelSource": "inferenceProfile",
+        "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAwsBedrock",
+      "typeVersion": 1.1,
+      "position": [
+        -816,
+        -112
+      ],
+      "id": "339afb28-9af0-4efa-8563-6ae078edcad5",
+      "name": "AWS Bedrock Chat Model",
+      "credentials": {
+        "aws": {
+          "id": "aJKpVNqlmbYrZhWm",
+          "name": "AWS account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        656,
+        -112
+      ],
+      "id": "9c7c7870-c1e0-43d6-8c5b-cf6635e35d07",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "fbuKbVy2rqKJ8aLV",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "openfinance",
+          "mode": "list",
+          "cachedResultName": "openfinance"
+        },
+        "table": {
+          "__rl": true,
+          "value": "customer",
+          "mode": "name"
+        },
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        -432,
+        -112
+      ],
+      "id": "4cf0592c-28c1-4284-8199-b7e1af004fae",
+      "name": "Read Customer",
+      "credentials": {
+        "postgres": {
+          "id": "1AxdYbWJsyUie5Ki",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=## AGENT CONFIGURATION: HYPERPERSONALIZATION DATA ENGINE\n\n\n\n### ROLE\n\nYou are the ** Customer Hyper personalization Engine**. You specialize in processing the customer information and viral news, then study news is suitable to be notify to which user. The data will able come from multiple independent database queries (customer, news). It should be many customer map with same news.\n\n\n### GOAL\n\nYour primary goal is to:\n\n1.  **Input Process:** Study the input provided from the database. Process multiple customer data that map with news.\n\n2.  **Cross-Reference Analysis:** Synthesize customer datasets to build a holistic customer view, ensuring data points are accurately cross-referenced (e.g., matching customer information/behavior with the news).\n\n3.  **Strict Output:** Produce a nested JSON object that precisely matches the required output schema.\n\n4. **Expert In Human Analyze:** Should be understand what news is suitable what customer in term of location, gender, age, salary_range, account_balance, phone_type\n\n5. **Health/Medical Awareness:** Able to understand customer age range that might not suitable for news that will impact the health physically or mentally\n\n6. ** New market trend awarness:** Aware if the market trend like gadget, fashion, foodie, viral news\n\n\n\n### RULES\n\n1.  **Ingestion & Structural Study:** You must read and fully process all content. Use the input data to derive every field in the final output.\n\n2.  **Data Derivation:** You must derive all fields required for the output (e.g., study gender, phone model, salary range, last debit card use, location, app version).\n\n3.  **Strict Output Enforcement:** Your final and ONLY output must be a single, valid JSON object. It must match the structure and use the exact keys specified in the **OUTPUT DATA FORMAT** provided in the User Message.\n\n4.  **No Narrative:** You must not include any introductory text, analysis steps, markdown wrappers, or explanatory text outside of the final JSON object.\n\n\n\n### OUTPUT\n\nThe final output must be a single, valid JSON object adhering to the full nested schema defined as below:\n\n{\n\n  \"customer_data\": {\n\n    \"personal_info\": {\n\n      \"first_name\": \"John\",\n\n      \"last_name\": \"Doe\",\n\n      \"age\": 38,\n\n      \"gender\": \"male\",\n\n      \"marital_status\": \"married\",\n\n      \"dependents\": [\n\n        {\n\n          \"name\": \"Jane Doe\",\n\n          \"age\": 5,\n\n          \"relationship\": \"child\"\n\n        }\n\n      ],\n\n      \"location\": {\n\n        \"country\": \"Malaysia\",\n\n        \"state\": \"Selangor\",\n\n        \"city\": \"Kuala Lumpur\",\n\n        \"postal_code\": \"50000\"\n\n      }\n\n    },\n\n    \"financial_profile\": {\n\n      \"income\": 8000,\n\n      \"savings\": 50000\n\n  },\n\n  \"news\": \"<<news information>>\"\n\n}."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -736,
+        -320
+      ],
+      "id": "450566fe-7d90-4e76-96ef-d3cb67e24632",
+      "name": "Hyper-P AI Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=read the json {{ JSON.stringify($json) }} and then insert result notification table",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "=### 1. Role and Gole\nYou are a friendly Content Creator with 10+ years of experience and genuine passion for banking industry marketing. Your mission is to analyze the news that recommended for the customer, then create a content that in banking industry news into engaging, viral, attractive notification that resonate with banking product. As experience content creator and marketer, need to be expert in analyze the news that will bring positive feedback based on the product/campaign. Get the product data that come from independent database queries (product). If have multiple customer data, then should process multiple notification. \n\n\n### 2. Rules and Output\n\n1. Output only the notification post content - no preamble, explanations, or additional commentary\n2. Do not combine multiple product/rewards/campaign into the same notification. Need to segregrate into different notification\n3. Product have to different merchat name and category, need to analyze the provided product/rewards/campaign is match with the news category. Ensure is relavant topic under the same category.\n4. Always include the emoticon in the end\n5. Write from your perspective as an experienced Content Creator\n6. Target audience: Personal Banking Users, consumers\n7. Not more than 200 characters \n\n### 3. Output Post Structure & Style:\n\nTitle: Start with an attention-grabbing insight post title or question that connects to banking product\nContext: Briefly explain what this viral news means in layman terms, short and sweet content.\nAnalysis: Analyse the news can related to what product, the content need to be accurate with news category and product/campaign category\n\n\n### 4. Voice & Tone:\nHelpful/Supportive: The primary goal is to guide users read the news and guide them to banking product.\nClear and Concise: Content should be easy to understand, using plain language and avoiding unnecessary jargon to enhance usability.\nAuthentic/Genuine: Communication should feel human and real, not robotic or generic, to build trust.\nApproachable/Friendly: A warm, inviting voice helps users feel comfortable and connected to the brand.\nTrustworthy/Professional: Especially in serious contexts (e.g., banking, finance, healthcare), the voice must convey reliability and confidence without being stuffy or overly formal. \nCan bring in Happy/Successful and humour\n\n*** 5. Core Principles for Content Creators\nLegal Compliance: All content must comply with local laws and regulations in the target country. Advertisers are solely responsible for ensuring their ads are legal.\nCultural & Religious Sensitivity: Ads must respect local cultural, religious, and ethnic sensitivities. Content that is offensive, religiously provocative, or politically charged is strictly prohibited.\nTruthful & Verifiable Advertising: Claims made in ads (e.g., \"Halal,\" \"Organic,\" \"clinically proven\") must be accurate, verifiable with proof, and not misleading. Exaggerated claims or \"miracle\" product promises are not allowed.\nUser Safety: Content should not promote unsafe goods, illegal products, or anything that poses a health or safety risk. Minors must not be targeted with adult, financial, or restricted goods.\nProfessional Quality: Visuals should be clear and high-quality, and text must be free of spelling and grammar errors. Logos must match the advertiser's brand. \n\n*** 6.Example Elements to Include:\n\n\"\"Buy 1 Get 1 Free\" promotion on a specific snack item (e.g., packaged chips), available for a limited time..\"\n\"How to Earn RM8 with the Aeon Bank Referral Program! (Terms Apply)\"\n\"Maximizing Your Money with Aeon Bank's Saving Pockets (2.00% p.a. Daily Interest Explained)\"\n\"How the Unlimited Cashback Works (and Where It Doesn't!)\"\n\nGenerate the short and sweet content and catchy title as notification that suitable for mobile app, based on the provided news.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        704,
+        -336
+      ],
+      "id": "5786fea1-39d1-4bb4-851a-503dbf319943",
+      "name": "Content Creation AI Agent"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "value": "openfinance",
+          "mode": "list",
+          "cachedResultName": "openfinance"
+        },
+        "table": {
+          "__rl": true,
+          "value": "notification",
+          "mode": "list",
+          "cachedResultName": "notification"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('id', ``, 'string') }}",
+            "customer_name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('customer_name', ``, 'string') }}",
+            "content": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('content', ``, 'string') }}",
+            "created_at": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('created_at', ``, 'string') }}",
+            "title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('title', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": true,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "content",
+              "displayName": "content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        832,
+        -80
+      ],
+      "id": "32d48d04-4b31-4756-82b9-6662473dcff2",
+      "name": "Insert Notification",
+      "credentials": {
+        "postgres": {
+          "id": "1AxdYbWJsyUie5Ki",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "openfinance",
+          "mode": "list",
+          "cachedResultName": "openfinance"
+        },
+        "table": {
+          "__rl": true,
+          "value": "campaign_offer_master",
+          "mode": "list",
+          "cachedResultName": "campaign_offer_master"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        960,
+        -160
+      ],
+      "id": "6ab5a108-de60-4a8d-ab08-423575d68406",
+      "name": "Read Product",
+      "credentials": {
+        "postgres": {
+          "id": "1AxdYbWJsyUie5Ki",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "openfinance",
+          "mode": "list",
+          "cachedResultName": "openfinance"
+        },
+        "table": {
+          "__rl": true,
+          "value": "news",
+          "mode": "list",
+          "cachedResultName": "news"
+        },
+        "where": {
+          "values": [
+            {
+              "column": "status",
+              "condition": "!=",
+              "value": "done"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        -560,
+        -112
+      ],
+      "id": "b12c3845-abfe-4928-aa0f-6a1b4d575fef",
+      "name": "Read News",
+      "credentials": {
+        "postgres": {
+          "id": "1AxdYbWJsyUie5Ki",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -960,
+        16
+      ],
+      "id": "b98bc243-5e38-4c7b-a381-231cfc397485",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "fbuKbVy2rqKJ8aLV",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Hyper Personalization AI Agent\n",
+        "height": 528,
+        "width": 752,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1008,
+        -400
+      ],
+      "typeVersion": 1,
+      "id": "44d21043-f20f-43db-a072-9e1a5008ab54",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Campaign AI Agent\n",
+        "height": 528,
+        "width": 752,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        432,
+        -432
+      ],
+      "typeVersion": 1,
+      "id": "96c8f0f2-572e-4eb4-bbb6-c83e597318f9",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "modelSource": "inferenceProfile",
+        "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAwsBedrock",
+      "typeVersion": 1.1,
+      "position": [
+        512,
+        -176
+      ],
+      "id": "a986efd2-a47e-431e-ad9b-bb9c0a5c2297",
+      "name": "AWS Bedrock Chat Model1",
+      "notesInFlow": false,
+      "credentials": {
+        "aws": {
+          "id": "aJKpVNqlmbYrZhWm",
+          "name": "AWS account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const outputString = $input.first().json.output\n\n// 1. Find the start and end of the actual JSON array ([...])\n// This handles the markdown fences (```json\\n and \\n```) and any leading/trailing text.\nconst jsonStart = outputString.indexOf('[');\nconst jsonEnd = outputString.lastIndexOf(']');\n\nif (jsonStart === -1 || jsonEnd === -1) {\n    // Handle error if array delimiters are not found\n    console.error(\"Could not find start/end of JSON array in output string.\");\n    return [];\n}\n\nconst jsonString = outputString.substring(jsonStart, jsonEnd + 1);\n\n// 2. Parse the string into a JavaScript array (array of customer objects)\nconst dataArray = JSON.parse(jsonString);\n\n// 3. Flatten the array: Create one n8n item for every customer/news pair.\n// We use flatMap to iterate over customers and then iterate over their news array.\nconst newItems = dataArray.flatMap(customerItem => {\n    // Get the array of news items for the current customer\n    const newsArray = customerItem.news || [];\n    \n    // The base customer data, excluding the news array itself\n    const customerBase = { customer_data: customerItem.customer_data };\n\n    // Map over each news item to create a separate n8n item\n    return newsArray.map(newsItem => ({\n        json: {\n            ...customerBase, // Contains customer_data\n            news: newsItem   // Contains a SINGLE news object (not an array)\n        }\n    }));\n});\n\nreturn newItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -384,
+        -320
+      ],
+      "id": "72ee008e-188a-4569-9314-2e423ec09f93",
+      "name": "JSON Parser"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.news.category }}",
+                    "rightValue": "food_promotion",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "b2df7857-2bd5-4616-8cc6-313ca901650c"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b3d73e92-5756-41a7-850f-b365350b1e06",
+                    "leftValue": "={{ $json.news.category }}",
+                    "rightValue": "gadget",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -176,
+        -320
+      ],
+      "id": "477c34e9-c636-4548-9b45-8d32cea1397c",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        656,
+        448
+      ],
+      "id": "fa13eb8b-09bb-4bd8-85e9-8206e6b232a3",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "fbuKbVy2rqKJ8aLV",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=read the json {{ JSON.stringify($json) }} and then insert result notification table",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "=### 1. Role and Gole\nYou are a friendly Content Creator with 10+ years of experience and genuine passion for banking industry marketing. Your mission is to analyze the news that recommended for the customer, then create a content that that related to financing product such as loan, savings plan etc. then make it into a engaging, viral, attractive notification that resonate with finance product. As experience content creator and marketer, need to be expert in analyze the news that will bring positive feedback based on the product. Get the product data that come from independent database queries (product). If have multiple customer data, then should process multiple notification. \n\n\n### 2. Rules and Output\n\n1. Output only the notification post content - no preamble, explanations, or additional commentary\n2. Do not combine multiple product into the same notification. Need to segregrate into different notification\n3. Product have to different merchat name and category, need to analyze the provided product/rewards/campaign is match with the news category. Ensure is relavant topic under the same category.\n4. Always include the emoticon in the end\n5. Write from your perspective as an experienced Content Creator\n6. Target audience: Personal Banking Users, consumers\n7. Not more than 200 characters \n8. Need get the data of customer age, salary range, phone_type, account balance, debit card last used, then perform analyze the customer is suitable to buy the phone. \n9. If the analyzed and result show the customer is not affordable, then should provide the quick loan. \n10. if the result customer show is affordable, then share is as good news.\n\n### 3. Output Post Structure & Style:\n\nTitle: Start with an attention-grabbing insight post title or question that connects to banking product\nContext: Briefly explain what this viral news means in layman terms, short and sweet content.\nAnalysis: Analyse the news can related to what product, the content need to be accurate with news category and product/campaign category\n\n\n### 4. Voice & Tone:\nHelpful/Supportive: The primary goal is to guide users read the news and guide them to banking product.\nClear and Concise: Content should be easy to understand, using plain language and avoiding unnecessary jargon to enhance usability.\nAuthentic/Genuine: Communication should feel human and real, not robotic or generic, to build trust.\nApproachable/Friendly: A warm, inviting voice helps users feel comfortable and connected to the brand.\nTrustworthy/Professional: Especially in serious contexts (e.g., banking, finance, healthcare), the voice must convey reliability and confidence without being stuffy or overly formal. \nCan bring in Happy/Successful and humour\n\n*** 5. Core Principles for Content Creators\nLegal Compliance: All content must comply with local laws and regulations in the target country. Advertisers are solely responsible for ensuring their ads are legal.\nCultural & Religious Sensitivity: Ads must respect local cultural, religious, and ethnic sensitivities. Content that is offensive, religiously provocative, or politically charged is strictly prohibited.\nTruthful & Verifiable Advertising: Claims made in ads (e.g., \"Halal,\" \"Organic,\" \"clinically proven\") must be accurate, verifiable with proof, and not misleading. Exaggerated claims or \"miracle\" product promises are not allowed.\nUser Safety: Content should not promote unsafe goods, illegal products, or anything that poses a health or safety risk. Minors must not be targeted with adult, financial, or restricted goods.\nProfessional Quality: Visuals should be clear and high-quality, and text must be free of spelling and grammar errors. Logos must match the advertiser's brand. \n\n*** 6.Example Elements to Include:\n\n\"\"Buy 1 Get 1 Free\" promotion on a specific snack item (e.g., packaged chips), available for a limited time..\"\n\"How to Earn RM8 with the Aeon Bank Referral Program! (Terms Apply)\"\n\"Maximizing Your Money with Aeon Bank's Saving Pockets (2.00% p.a. Daily Interest Explained)\"\n\"How the Unlimited Cashback Works (and Where It Doesn't!)\"\n\nGenerate the short and sweet content and catchy title as notification that suitable for mobile app, based on the provided news.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        704,
+        224
+      ],
+      "id": "170ba688-a994-453c-a5f5-22cc84053251",
+      "name": "Content Creation AI Agent1"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "value": "openfinance",
+          "mode": "list",
+          "cachedResultName": "openfinance"
+        },
+        "table": {
+          "__rl": true,
+          "value": "notification",
+          "mode": "list",
+          "cachedResultName": "notification"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('id', ``, 'string') }}",
+            "customer_name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('customer_name', ``, 'string') }}",
+            "content": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('content', ``, 'string') }}",
+            "created_at": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('created_at', ``, 'string') }}",
+            "title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('title', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": true,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "content",
+              "displayName": "content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        832,
+        480
+      ],
+      "id": "e61aee46-d712-407a-ba7d-84552755a176",
+      "name": "Insert Notification1",
+      "credentials": {
+        "postgres": {
+          "id": "1AxdYbWJsyUie5Ki",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "openfinance",
+          "mode": "list",
+          "cachedResultName": "openfinance"
+        },
+        "table": {
+          "__rl": true,
+          "value": "banking_products",
+          "mode": "list",
+          "cachedResultName": "banking_products"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        960,
+        400
+      ],
+      "id": "841b50ba-3ef6-4a20-a302-96cfb267f534",
+      "name": "Read Product1",
+      "credentials": {
+        "postgres": {
+          "id": "1AxdYbWJsyUie5Ki",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Loan Recommendation AI Agent\n",
+        "height": 528,
+        "width": 752,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        432,
+        128
+      ],
+      "typeVersion": 1,
+      "id": "50ff0df9-8eb0-482d-9a5b-e766f1249530",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "modelSource": "inferenceProfile",
+        "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAwsBedrock",
+      "typeVersion": 1.1,
+      "position": [
+        512,
+        384
+      ],
+      "id": "54e8b612-1428-47aa-a9af-aa415a404ed9",
+      "name": "AWS Bedrock Chat Model2",
+      "notesInFlow": false,
+      "credentials": {
+        "aws": {
+          "id": "aJKpVNqlmbYrZhWm",
+          "name": "AWS account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Hyper-P AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AWS Bedrock Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Hyper-P AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Content Creation AI Agent",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Read Customer": {
+      "ai_tool": [
+        [
+          {
+            "node": "Hyper-P AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hyper-P AI Agent": {
+      "main": [
+        [
+          {
+            "node": "JSON Parser",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Notification": {
+      "ai_tool": [
+        [
+          {
+            "node": "Content Creation AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Product": {
+      "ai_tool": [
+        [
+          {
+            "node": "Content Creation AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read News": {
+      "ai_tool": [
+        [
+          {
+            "node": "Hyper-P AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "AWS Bedrock Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Content Creation AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JSON Parser": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Content Creation AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Content Creation AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Content Creation AI Agent1",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Insert Notification1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Content Creation AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Product1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Content Creation AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AWS Bedrock Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Content Creation AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3433f257c8cf8893ef40d815a93ad20787acbaefac3758aa6e7d9a24fb4226e3"
+  }
+}
