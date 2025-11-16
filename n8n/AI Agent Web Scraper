@@ -1,0 +1,383 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=read the json {{ JSON.stringify($json) }} and then insert result to news table",
+        "options": {
+          "systemMessage": "=### 1. Role and Gole\nYou are a friendly news analyst/scrapers with many years of experience and genuine passion for banking industry marketing. Your mission is to analyze the news from input then make it as useful material for the marketing to create campaign/promotion/awareness/latest gadget for the customer,th news should look into engaging, viral, attractive content. As experience news analyst/scrapers, need to be expert in analyze the news that will bring positive feedback based on the product/campaign. Get the product/campaign data that come from independent database queries.\n\n\n### 2. Rules and Output\n\n1. Output only the news post content - no preamble, explanations, or additional commentary\n2. Do combine multiple product/rewards/campaign into the same news if relavant. \n3. Product have to different merchat name and category, need to analyze the provided product/rewards/campaign is match with the news. Ensure is relavant topic under the same category.\n5. Write from your perspective as an experienced analyst/scrapers to come summary,reason\n6. Target audience: Personal Banking Users, consumers\n7. Reason and summary should Not more than 500 characters \n8. Only process, output the relevant news. If not relavant, just skip it.\n\n### 3. Output Post Structure & Style:\n\nSummary: Start with an attention-grabbing insight summary that connects to banking product\nReason: Briefly explain what this viral news means in layman terms, short and sweet content.\nAnalysis: Analyse the news can related to what product, the content need to be accurate with news category and product/campaign category\n\n\n*** 4. Core Principles for News scrappers\nLegal Compliance: All content must comply with local laws and regulations in the target country. Advertisers are solely responsible for ensuring their ads are legal.\nCultural & Religious Sensitivity: Ads must respect local cultural, religious, and ethnic sensitivities. Content that is offensive, religiously provocative, or politically charged is strictly prohibited.\nTruthful & Verifiable Advertising: Claims made in ads (e.g., \"Halal,\" \"Organic,\" \"clinically proven\") must be accurate, verifiable with proof, and not misleading. Exaggerated claims or \"miracle\" product promises are not allowed.\nUser Safety: Content should not promote unsafe goods, illegal products, or anything that poses a health or safety risk. Minors must not be targeted with adult, financial, or restricted goods.\nProfessional Quality: Visuals should be clear and high-quality, and text must be free of spelling and grammar errors. Logos must match the advertiser's brand. \n\n*** 5.Follow Below category to for the analyze:\n\nfood_promotion: is all related the latest food promotion and viral food news\ngadget: is all about latest gadget like phone, tablet\nhealth: topic that related to health, medicine, vaccine etc.\ncybersecurity: topic related to cyber security, scamming, fraud cases etc.\n\n**6. Output structure\n\nout the data as below with json format:\n- title\n- source\n- url\n- published_date\n- category\n- summary\n- reason\n- status"
+        }
+      },
+      "id": "7d8428a2-a6ca-445b-8066-6cd5e682f11a",
+      "name": "Web Scrapper Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        816,
+        0
+      ],
+      "alwaysOutputData": false,
+      "executeOnce": false,
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "maxTries": 5,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -64,
+        0
+      ],
+      "id": "3d7c4b7e-30df-41e3-b41c-c6f8b770dff3",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "modelSource": "inferenceProfile",
+        "model": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAwsBedrock",
+      "typeVersion": 1.1,
+      "position": [
+        592,
+        176
+      ],
+      "id": "956def0d-6411-4c36-8c57-c65f43d575ff",
+      "name": "AWS Bedrock Chat Model",
+      "credentials": {
+        "aws": {
+          "id": "aJKpVNqlmbYrZhWm",
+          "name": "AWS account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://news.google.com/rss/",
+        "options": {
+          "customFields": "=Limit Items"
+        }
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        304,
+        0
+      ],
+      "id": "c2770f76-e5ef-4f81-a38d-805621ac1626",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Define the categories and their keywords using Regular Expressions\n// The 'i' flag at the end makes the search case-insensitive.\n// Define the categories and their keywords using Regular Expressions\nconst categories = {\n    'food_promotion': /(food|promo|promotion|viral|restaurant|burger|pizza|ramen|sushi|dining|eat|fnb|recipe)/i,\n    'gadget': /(gadget|phone|tablet|new tech|android|ios|smartphone|laptop|earbud|wearable|huawei|apple|wuling|cortez)/i,\n    'health': /(health|medicine|vaccine|disease|hospital|wellness|medical|fitness|treatment|influenza|diabetes)/i,\n    'cybersecurity': /(cybersecurity|scam|fraud|hack|phishing|virus|data breach|malware|ransomware|security)/i,\n    'politics_local': /(sabah|election|anwar|pakatan|grs|pas|putrajaya|malay mail|nst online)/i,\n    // Note: The 'other' category is defined below to ensure only these keys are processed above\n};\n\nconst outputItems = items.map(item => {\n    const title = item.json.title || ''; \n    let foundCategory = 'other'; // Default category\n\n    // Iterate over the defined categories\n    for (const categoryKey in categories) {\n        const regex = categories[categoryKey];\n        \n        if (regex.test(title)) {\n            foundCategory = categoryKey;\n            break; \n        }\n    }\n\n    // Explicitly add the new field to the item's JSON object\n    item.json.topic_category = foundCategory;\n    \n    // Return the entire modified item object in the expected n8n structure\n    return item;\n});\n\nreturn outputItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        608,
+        0
+      ],
+      "id": "fa0a9a13-4f7f-4738-ae62-ba5ee141da53",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "openfinance",
+          "mode": "list",
+          "cachedResultName": "openfinance"
+        },
+        "table": {
+          "__rl": true,
+          "value": "banking_products",
+          "mode": "list",
+          "cachedResultName": "banking_products"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        1120,
+        128
+      ],
+      "id": "92197513-d5eb-4f87-8e36-a6fc238d4a82",
+      "name": "Read Products",
+      "credentials": {
+        "postgres": {
+          "id": "1AxdYbWJsyUie5Ki",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "openfinance",
+          "mode": "list",
+          "cachedResultName": "openfinance"
+        },
+        "table": {
+          "__rl": true,
+          "value": "campaign_offer_master",
+          "mode": "list",
+          "cachedResultName": "campaign_offer_master"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        1008,
+        208
+      ],
+      "id": "87641a90-fc42-4dc6-8454-61f886622775",
+      "name": "Read Campagin",
+      "credentials": {
+        "postgres": {
+          "id": "1AxdYbWJsyUie5Ki",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "value": "openfinance",
+          "mode": "list",
+          "cachedResultName": "openfinance"
+        },
+        "table": {
+          "__rl": true,
+          "value": "news",
+          "mode": "list",
+          "cachedResultName": "news"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('title', ``, 'string') }}",
+            "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('summary', `mapped from field summary`, 'string') }}",
+            "reason": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('reason', `mapped from field reason`, 'string') }}",
+            "category": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('category', `mapped from field category`, 'string') }}",
+            "url": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('url', `mapped from field url`, 'string') }}",
+            "status": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('status', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "reason",
+              "displayName": "reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        880,
+        208
+      ],
+      "id": "09ee22ae-9359-492e-9f6e-04a0eed6b4e4",
+      "name": "Insert News",
+      "credentials": {
+        "postgres": {
+          "id": "1AxdYbWJsyUie5Ki",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        688,
+        208
+      ],
+      "id": "08d15f10-2e09-4a77-9c56-a7da379929db",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "fbuKbVy2rqKJ8aLV",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AWS Bedrock Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Web Scrapper Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Products": {
+      "ai_tool": [
+        [
+          {
+            "node": "Web Scrapper Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Campagin": {
+      "ai_tool": [
+        [
+          {
+            "node": "Web Scrapper Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert News": {
+      "ai_tool": [
+        [
+          {
+            "node": "Web Scrapper Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Web Scrapper Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3433f257c8cf8893ef40d815a93ad20787acbaefac3758aa6e7d9a24fb4226e3"
+  }
+}
