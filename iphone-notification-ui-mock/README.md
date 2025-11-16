@@ -15,5 +15,6 @@ View your app in AI Studio: https://ai.studio/apps/drive/1WB1nhPyWEcxzosiUMx3lwq
 
 1. Install dependencies:
    `npm install`
-3. Run the app:
+2. Run the app:
    `npm run dev`
+3. Get the port displayed , eg : 3001 , add to zenkai_backend server cors at server.js line 13
